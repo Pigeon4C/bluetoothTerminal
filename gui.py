@@ -17,11 +17,18 @@ def createWindow(title: str, height: int, width: int):
 
 def createMainGui(title: str, height: int, width: int, ):
   sGui = createWindow(title, height, width)
-    
 
-  for portName in bl.listSerialPorts():
-    portButton = tk.Button(sGui, text=portName, command=lambda t=portName: openTerminal(t))
-    portButton.pack(pady=5, padx=5, side=tk.TOP, anchor=tk.NW)
+  sGui.portButtons = []
+
+  refreshButton = tk.Button(sGui, text="Refresh", command=lambda s=sGui: createPortButtons(s))
+  refreshButton.pack(padx=5, pady=5, side=tk.TOP, anchor=tk.NW)
+  
+  sGui.portButtonFrame = tk.Frame(sGui)
+  sGui.portButtonFrame.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
+
+  createPortButtons(sGui)
+
+  
 
   return sGui
 
@@ -31,9 +38,10 @@ def createTerminalGui(title: str, height: int, width: int, ):
   commandEntry = tk.Entry(tGui, width=width)
   commandEntry.pack(pady=5, padx=5, side=tk.BOTTOM, anchor=tk.S)
    
-  ser = bl.connectSerial(title)
-    
+  log = tk.Text(tGui, state=tk.DISABLED, wrap=tk.WORD)
+  log.pack(padx=10, pady=5)
 
+  ser = bl.connectSerial(title)
   tGui.bind("<Return>", lambda event="", c=commandEntry, s=ser: bl.sendCommand(event, c, s))
   return tGui, ser
 
@@ -45,3 +53,13 @@ def openTerminal(windowName):
     bl.receiveMessage()
   terminal.mainloop()
 
+
+def createPortButtons(sGui):
+  if len(sGui.portButtons) > 0:
+    for portButton in sGui.portButtons:
+      portButton.destroy()
+    sGui.portButtons.clear()
+  for idx, portName in enumerate(bl.listSerialPorts()):
+    portButton = tk.Button(sGui.portButtonFrame, text=portName, command=lambda t=portName: openTerminal(t))
+    portButton.grid(row=0, column=idx, padx=5, pady=5)
+    sGui.portButtons.append(portButton)
