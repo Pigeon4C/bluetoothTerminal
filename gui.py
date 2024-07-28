@@ -1,8 +1,10 @@
 import tkinter as tk
 import tkinter.scrolledtext as st
+from tkinter.simpledialog import askstring
 
 import bluetooth as bl
 import log
+import config
 
 
 def createWindow(title: str, height: int, width: int):
@@ -39,6 +41,11 @@ def createTerminalGui(title: str, height: int, width: int, ):
   commandEntry = tk.Entry(tGui, width=width)
   commandEntry.pack(pady=5, padx=5, side=tk.BOTTOM, anchor=tk.S)
 
+  tGui.macroButtonFrame = tk.Frame(tGui)
+  tGui.macroButtonFrame.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
+
+  createMacroButtons(tGui)
+
   log = st.ScrolledText(tGui, state=tk.DISABLED, wrap=tk.WORD)
   log.pack(padx=5, pady=5)
 
@@ -55,6 +62,30 @@ def openTerminal(windowName):
   terminal.mainloop()
 
 
+def excecuteMacro(macroName):
+  print(macroName)
+  button_content = config.getValue(macroName + "-command")
+  if button_content != "ERROR":
+    bl.sendCommand(ser, button_content)
+    print_chat_log(f"Send: {button_content}")
+  else:
+    print_chat_log(f"Macro has no function")
+  return
+
+
+def configMacro(event, idx, macroButton):
+  print(idx)
+  displayName = askstring("Rename", "Enter the new display name")
+  buttonContent = askstring("Button function", "Enter macro command for this macro")
+  macroDict = {
+    str(idx): displayName,
+    str(idx) + "-command": buttonContent,
+  }
+  config.writeConfig(macroDict)
+  macroButton.config(text=displayName)
+
+
+
 def createPortButtons(sGui):
   if len(sGui.portButtons) > 0:
     for portButton in sGui.portButtons:
@@ -64,3 +95,10 @@ def createPortButtons(sGui):
     portButton = tk.Button(sGui.portButtonFrame, text=portName, command=lambda t=portName: openTerminal(t))
     portButton.grid(row=0, column=idx, padx=5, pady=5)
     sGui.portButtons.append(portButton)
+
+
+def createMacroButtons(tGui):
+  for idx, macroName in enumerate(range(1,6)):
+    macroButton = tk.Button(tGui.macroButtonFrame, text=config.getValue(idx), command=lambda t=macroName: excecuteMacro(t))
+    macroButton.bind("<Button-3>", lambda event, t=idx, b=macroButton: configMacro(event, t ,b))
+    macroButton.grid(row=0, column=idx, padx=5, pady=5)
