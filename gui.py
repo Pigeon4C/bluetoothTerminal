@@ -63,13 +63,6 @@ def openTerminal(windowName):
 
 
 def excecuteMacro(macroName):
-  print(macroName)
-  button_content = config.getValue(macroName + "-command")
-  if button_content != "ERROR":
-    bl.sendCommand(ser, button_content)
-    print_chat_log(f"Send: {button_content}")
-  else:
-    print_chat_log(f"Macro has no function")
   return
 
 
