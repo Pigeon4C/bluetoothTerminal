@@ -1,4 +1,5 @@
 import tkinter as tk
+import tkinter.scrolledtext as st
 
 import bluetooth as bl
 import log
@@ -37,20 +38,20 @@ def createTerminalGui(title: str, height: int, width: int, ):
   tGui = createWindow(title, height, width)
   commandEntry = tk.Entry(tGui, width=width)
   commandEntry.pack(pady=5, padx=5, side=tk.BOTTOM, anchor=tk.S)
-   
-  log = tk.Text(tGui, state=tk.DISABLED, wrap=tk.WORD)
-  log.pack(padx=10, pady=5)
+
+  log = st.ScrolledText(tGui, state=tk.DISABLED, wrap=tk.WORD)
+  log.pack(padx=5, pady=5)
 
   ser = bl.connectSerial(title)
-  tGui.bind("<Return>", lambda event="", c=commandEntry, s=ser: bl.sendCommand(event, c, s))
-  return tGui, ser
+  tGui.bind("<Return>", lambda event="", c=commandEntry, s=ser, l=log: bl.sendCommand(event, c, s, l))
+  return tGui, ser, log
 
 
 def openTerminal(windowName):
   print("open Terminal "+ str(windowName))
-  terminal, ser = createTerminalGui(str(windowName), 400, 200)
+  terminal, ser, log = createTerminalGui(str(windowName), 400, 200)
   if ser.in_waiting > 0:
-    bl.receiveMessage()
+    bl.receiveMessage(ser, log)
   terminal.mainloop()
 
 
