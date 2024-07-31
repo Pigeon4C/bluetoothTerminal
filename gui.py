@@ -157,14 +157,20 @@ def createPortButtons(sGui):
 
 def createMacroButtons(tGui):
   try:
-    for idx in range(1,6):
+    row = 1
+    column = 0
+    for idx in range(1,22):
       if not config.getValue(f"Macro{idx}") == "not available":
         macroName = config.getValue(f"Macro{idx}")
       else:
         macroName = f"Macro{idx}"
+      if idx == 8 or idx == 15 or idx == 24:
+        row += 1
+        column = 0
       macroButton = tk.Button(tGui.macroButtonFrame, text=macroName, command=lambda t=idx: excecuteMacro(t))
       macroButton.bind("<Button-3>", lambda event, t=idx, b=macroButton: configMacro(event, t ,b))
-      macroButton.grid(row=0, column=idx, padx=5, pady=5)
+      macroButton.grid(row=row - 1, column=column, padx=5, pady=5)
+      column += 1
     return
   except Exception as e:
     log.log(str(e))
