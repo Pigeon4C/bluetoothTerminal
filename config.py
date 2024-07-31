@@ -9,10 +9,12 @@ def init():
     global filePath
     if not os.path.isdir(filePath):
       os.makedirs(filePath)
+      log.log(f"Created config dir with path: '{filePath}'")
     configFilePath = os.path.join(filePath, "config.txt")
     if not os.path.isfile(configFilePath):
       with open(configFilePath, "x"):
         pass
+      log.log(f"Created config file with path: '{configFilePath}'")
   except Exception as e:
     log.log(str(e))
 
@@ -31,6 +33,7 @@ def writeConfig(data: dict[str, str]):
         for key in configData.keys():
           configFile.write(f"{key}={configData[key]}\n")
         configFile.close()
+      log.log(f"Data wrote to config file: '{data}'")
   except Exception as e:
     log.log(str(e))
 
@@ -46,6 +49,7 @@ def readConfig():
         key, value = line.strip().split("=")
         dataDict[key] = value
       configFile.close()
+      log.log(f"Red Config file with data: '{dataDict}'")
       return dataDict
   except Exception as e:
     log.log(str(e))

@@ -12,32 +12,35 @@ def listSerialPorts():
     log.log(str(e))
     return
 
-def connectSerial(port):
+def connectSerial(port, baudrate, timeout):
   try:
-    return serial.Serial(port, baudrate=9600, timeout=1)
+    ser = serial.Serial(port, baudrate=baudrate, timeout=timeout)
+    log.log(f"Connected to Serial Port: '{port}' with baudrate: '{baudrate}' and timeout: '{timeout}'")
+    return ser
   except Exception as e:
     log.log(str(e))
     return 
 
-def sendMacroCommand(command, log, ser):
+def sendMacroCommand(command, TerminalLog, ser):
   try:
     if command.strip() == "not available":
-      log.config(state=tk.NORMAL)
+      TerminalLog.config(state=tk.NORMAL)
       now = datetime.now()
-      log.insert("1.0", f"[{now.strftime('%H:%M:%S.%f')[:-3]}] No Command associated with Macro\n")
-      log.config(state=tk.DISABLED)
+      TerminalLog.insert("1.0", f"[{now.strftime('%H:%M:%S.%f')[:-3]}] No Command associated with Macro\n")
+      TerminalLog.config(state=tk.DISABLED)
       return
     ser.write(command.encode())
-    log.config(state=tk.NORMAL)
+    TerminalLog.config(state=tk.NORMAL)
     now = datetime.now()
-    log.insert("1.0", f"[{now.strftime('%H:%M:%S.%f')[:-3]}] Send: {command}\n")
-    log.config(state=tk.DISABLED)
+    TerminalLog.insert("1.0", f"[{now.strftime('%H:%M:%S.%f')[:-3]}] Send: {command}\n")
+    TerminalLog.config(state=tk.DISABLED)
+    log.log(f"Send command: '{command}'")
     return
   except Exception as e:
     log.log(str(e))
     return
 
-def sendCommand(event, commandEntry: tk.Entry, ser: serial.Serial, log: tk.Text):
+def sendCommand(event, commandEntry: tk.Entry, ser: serial.Serial, TerminalLog: tk.Text):
   try:
     command = commandEntry.get()
     commandEntry.delete(0, tk.END)
@@ -45,21 +48,24 @@ def sendCommand(event, commandEntry: tk.Entry, ser: serial.Serial, log: tk.Text)
     if command == "":
       return
     ser.write(command.encode())
-    log.config(state=tk.NORMAL)
+    TerminalLog.config(state=tk.NORMAL)
     now = datetime.now()
-    log.insert("1.0", f"[{now.strftime('%H:%M:%S.%f')[:-3]}] Send: {command}\n")
-    log.config(state=tk.DISABLED)
+    TerminalLog.insert("1.0", f"[{now.strftime('%H:%M:%S.%f')[:-3]}] Send: {command}\n")
+    TerminalLog.config(state=tk.DISABLED)
+    log.log(f"Send command: '{command}'")
     return
   except Exception as e:
     log.log(str(e))
+    return
 
-def receiveMessage(ser: serial.Serial, log) -> str:
+def receiveMessage(ser: serial.Serial, TerminalLog) -> str:
   try:
     message = ser.readall()
-    log.config(state=tk.NORMAL)
+    TerminalLog.config(state=tk.NORMAL)
     now = datetime.now()
-    log.insert("1.0", f"[{now.strftime('%H:%M:%S.%f')[:-3]}] {message}\n")
-    log.config(state=tk.DISABLED)
+    TerminalLog.insert("1.0", f"[{now.strftime('%H:%M:%S.%f')[:-3]}] {message}\n")
+    TerminalLog.config(state=tk.DISABLED)
+    log.log(f"Received Message: '{message}'")
     return str(message)
   except Exception as e:
     log.log(str(e))

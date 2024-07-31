@@ -12,7 +12,7 @@ ser = ""
 
 def createWindow(title: str, width: int, height: int):
   try:
-    dimmension = f"{height}x{width}"
+    dimmension = f"{width}x{height}"
     window = tk.Tk()
     window.title(title)
     window.geometry(dimmension)
@@ -21,9 +21,9 @@ def createWindow(title: str, width: int, height: int):
     log.log(str(e))
     return
 
-def createMainGui(title: str, height: int, width: int):
+def createMainGui(title: str, width: int, height: int):
   try:
-    sGui = createWindow(title, height, width)
+    sGui = createWindow(title, width, height)
 
     sGui.portButtons = []
 
@@ -34,6 +34,7 @@ def createMainGui(title: str, height: int, width: int):
     sGui.portButtonFrame.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
 
     createPortButtons(sGui)
+    log.log(f"Created Main Gui with title: {title}, width: {width}, height: {height}")
     return sGui
   except Exception as e:
     log.log(str(e))
@@ -42,7 +43,7 @@ def createMainGui(title: str, height: int, width: int):
 
 def createTerminalGui(title: str, port: str, width: int, height: int):
   try:
-    tGui = createWindow(title, height, width)
+    tGui = createWindow(title, width, height)
     commandEntry = tk.Entry(tGui, width=width)
     commandEntry.pack(pady=5, padx=5, side=tk.BOTTOM, anchor=tk.S)
 
@@ -54,13 +55,14 @@ def createTerminalGui(title: str, port: str, width: int, height: int):
     terminalLog = st.ScrolledText(tGui, state=tk.DISABLED, wrap=tk.WORD)
     terminalLog.pack(padx=5, pady=5)
 
-    ser = bl.connectSerial(port)
+    ser = bl.connectSerial(port, baudrate=9600, timeout=1)
     if ser == None:
       tGui.destroy()
       messagebox.showerror("Error", f"There was an issue creating a connection\
                                       \nwith port {port}")  
       raise ConnectionRefusedError("Connection wasn't established")
     tGui.bind("<Return>", lambda event="", c=commandEntry, s=ser, l=terminalLog: bl.sendCommand(event, c, s, l))
+    log.log(f"Created Terminal Window with title: {title}, width: {width}, height: {height}")
     return tGui, ser, terminalLog
   except Exception as e:
     log.log(str(e))
@@ -86,6 +88,7 @@ def openTerminal(portName):
 def excecuteMacro(idx):
   try:
     command = config.getValue(f"Macro{str(idx)}-command")
+    log.log(f"Excecuted Macro: 'Macro{idx}' with command: '{command}'")
     global terminalLog, ser
     bl.sendMacroCommand(command, terminalLog, ser)
     return
@@ -107,6 +110,7 @@ def configMacro(event, idx, macroButton):
     }
     config.writeConfig(macroDict)
     macroButton.config(text=displayName)
+    log.log(f"Created Macro with Name: '{displayName}' and function: '{buttonContent}'")
     return
   except Exception as e:
     log.log(str(e))
@@ -124,6 +128,7 @@ def configPortName(event, portName, portButton):
     }
     config.writeConfig(buttonDict)
     portButton.config(text=f"{displayName} ({portName})")
+    log.log(f"Configured Port name to: '{displayName}'")
     return
   except Exception as e:
     log.log(str(e))
