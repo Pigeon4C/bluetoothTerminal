@@ -9,7 +9,7 @@ import config
 log = ""
 ser = ""
 
-def createWindow(title: str, height: int, width: int):
+def createWindow(title: str, width: int, height: int):
   try:
     dimmension = f"{height}x{width}"
     window = tk.Tk()
@@ -18,9 +18,9 @@ def createWindow(title: str, height: int, width: int):
     return window
   except Exception as e:
     log.log(str(e))
+    return
 
-
-def createMainGui(title: str, height: int, width: int, ):
+def createMainGui(title: str, height: int, width: int):
   sGui = createWindow(title, height, width)
 
   sGui.portButtons = []
@@ -32,13 +32,10 @@ def createMainGui(title: str, height: int, width: int, ):
   sGui.portButtonFrame.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
 
   createPortButtons(sGui)
-
-  
-
   return sGui
 
 
-def createTerminalGui(title: str, height: int, width: int, ):
+def createTerminalGui(title: str, width: int, height: int, ):
   tGui = createWindow(title, height, width)
   commandEntry = tk.Entry(tGui, width=width)
   commandEntry.pack(pady=5, padx=5, side=tk.BOTTOM, anchor=tk.S)
@@ -56,14 +53,18 @@ def createTerminalGui(title: str, height: int, width: int, ):
   return tGui, ser, log
 
 
-def openTerminal(windowName):
-  print("open Terminal "+ str(windowName))
+def openTerminal(portName):
+  if not config.getValue(portName) == "not available":
+    displayName = f"{config.getValue(portName)} ({portName})"
+  else:
+    displayName = portName
+  print("open Terminal "+ str(displayName))
   global ser
-  terminal, ser, log = createTerminalGui(str(windowName), 400, 200)
+  terminal, ser, log = createTerminalGui(str(displayName), 600, 400)
   if ser.in_waiting > 0:
     bl.receiveMessage(ser, log)
   terminal.mainloop()
-
+  return
 
 def excecuteMacro(macroIdx):
   command = config.getValue(str(macroIdx) + "-command")
@@ -74,14 +75,31 @@ def excecuteMacro(macroIdx):
 
 def configMacro(event, idx, macroButton):
   print(idx)
-  displayName = askstring("Rename", "Enter the new display name")
+  displayName = askstring("Rename", "Enter the new display name\
+                                   \nMax length 20 characters")
   buttonContent = askstring("Button function", "Enter macro command for this macro")
+  if len(displayName) > 20:
+    displayName = displayName[0:20]
   macroDict = {
-    str(idx): displayName,
-    str(idx) + "-command": buttonContent,
+    f"Macro{str(idx)}": displayName,
+    f"Macro{str(idx)}-command": buttonContent,
   }
   config.writeConfig(macroDict)
   macroButton.config(text=displayName)
+  return
+
+
+def configPortName(event, portName, portButton):
+  displayName = askstring("Rename", "Enter the new display name\
+                                   \nMax length 20 characters")
+  if len(displayName) > 20:
+    displayName = displayName[0:20]
+  buttonDict = {
+    portName: displayName,
+  }
+  config.writeConfig(buttonDict)
+  portButton.config(text=f"{displayName} ({portName})")
+  return
 
 
 
@@ -91,17 +109,24 @@ def createPortButtons(sGui):
       portButton.destroy()
     sGui.portButtons.clear()
   for idx, portName in enumerate(bl.listSerialPorts()):
-    portButton = tk.Button(sGui.portButtonFrame, text=portName, command=lambda t=portName: openTerminal(t))
+    if not config.getValue(portName) == "not available":
+      displayName = f"{config.getValue(portName)} ({portName})"
+    else:
+      displayName = portName
+
+    portButton = tk.Button(sGui.portButtonFrame, text=displayName, command=lambda t=portName: openTerminal(t))
+    portButton.bind("<Button-3>", lambda event, t=portName, b=portButton: configPortName(event, t, b))
     portButton.grid(row=0, column=idx, padx=5, pady=5)
     sGui.portButtons.append(portButton)
-
+  return
 
 def createMacroButtons(tGui):
   for idx in range(1,6):
-    if not config.getValue(idx) == "not available":
-      macroName = config.getValue(idx)
+    if not config.getValue(f"Macro{idx}") == "not available":
+      macroName = config.getValue(f"Macro{idx}")
     else:
       macroName = f"Macro{idx}"
     macroButton = tk.Button(tGui.macroButtonFrame, text=macroName, command=lambda t=idx: excecuteMacro(t))
     macroButton.bind("<Button-3>", lambda event, t=idx, b=macroButton: configMacro(event, t ,b))
     macroButton.grid(row=0, column=idx, padx=5, pady=5)
+  return
