@@ -6,10 +6,13 @@ import config
 def main():
   log.init()
   config.init()
-  sGui = gui.createMainGui("Bluetooth Terminal", 400, 600)
-  sGui.mainloop()
-
-  return
+  try:
+    sGui = gui.createMainGui("Bluetooth Terminal", 400, 600)
+    sGui.mainloop()
+    return
+  except Exception as e:
+    log.log(str(e))
+    return
 
 
 if __name__ == "__main__":

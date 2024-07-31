@@ -1,56 +1,59 @@
 import os
 import log
 
-filePath = os.path.join("C:\\", "BluetoothTerminal", "config")
+filePath = os.path.join("C:\\", "BluetoothTerminal", "config\\")
 
 
 def init():
+  try:
     global filePath
     print(filePath)
-    try:
-        if not os.path.isdir(filePath):
-            os.makedirs(filePath)
-            print("makedir")
-        config_file_path = os.path.join(filePath, "config.txt")
-        if not os.path.isfile(config_file_path):
-            with open(config_file_path, "x"):
-                pass
-    except Exception as e:
-        log.log(str(e))
+    if not os.path.isdir(filePath):
+      os.makedirs(filePath)
+      print("makedir")
+    configFilePath = os.path.join(filePath, "config.txt")
+    if not os.path.isfile(configFilePath):
+      with open(configFilePath, "x"):
+        pass
+  except Exception as e:
+    log.log(str(e))
 
 
 def writeConfig(data: dict[str, str]):
+  try:
+    print(data)
     global filePath
-    try:
-        config_file_path = os.path.join(filePath, "config.txt")
-        configData = readConfig()
-        if configData is None:
-            configData = {}
-        
-        for key in data.keys():
-            configData[key] = data[key]
-
-        with open(config_file_path, "w") as config_file:
-            for key in configData.keys():
-                config_file.write(f"{key}={configData[key]}\n")
-    except Exception as e:
-        log.log(str(e))
+    configFilePath = os.path.join(filePath, "config.txt")
+    print(configFilePath)
+    configData = readConfig()
+    print(configData)
+    if configData == None:
+      configData = {}  
+    for key in data.keys():
+      configData[key] = data[key]
+      with open(configFilePath, "w") as configFile:
+        for key in configData.keys():
+          configFile.write(f"{key}={configData[key]}\n")
+        configFile.close()
+  except Exception as e:
+    log.log(str(e))
 
 
 def readConfig():
+  try:
     global filePath
     dataDict = {}
-    config_file_path = os.path.join(filePath, "config.txt")
-    try:
-        with open(config_file_path, "r") as configFile:
-            lines = configFile.readlines()
-        for line in lines:
-            key, value = line.strip().split("=")
-            dataDict[key] = value
-        return dataDict
-    except Exception as e:
-        log.log(str(e))
-        return None
+    configFilePath = os.path.join(filePath, "config.txt")
+    with open(configFilePath, "r") as configFile:
+      lines = configFile.readlines()
+      for line in lines:
+        key, value = line.strip().split("=")
+        dataDict[key] = value
+      configFile.close()
+      return dataDict
+  except Exception as e:
+    log.log(str(e))
+    return
     
 
 def getValue(key) -> str:
