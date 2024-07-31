@@ -73,7 +73,6 @@ def openTerminal(portName):
       displayName = f"{config.getValue(portName)} ({portName})"
     else:
       displayName = portName
-    print("open Terminal "+ str(displayName))
     global ser, terminalLog
     terminal, ser, terminalLog = createTerminalGui(displayName, portName, 600, 400)
     if ser.in_waiting > 0:
@@ -97,7 +96,6 @@ def excecuteMacro(idx):
 
 def configMacro(event, idx, macroButton):
   try:
-    print(idx)
     displayName = askstring("Rename", "Enter the new display name\
                                      \nMax length 20 characters")
     buttonContent = askstring("Button function", "Enter macro command for this macro")
@@ -107,7 +105,6 @@ def configMacro(event, idx, macroButton):
       f"Macro{str(idx)}": displayName,
       f"Macro{str(idx)}-command": buttonContent,
     }
-    print(macroDict)
     config.writeConfig(macroDict)
     macroButton.config(text=displayName)
     return

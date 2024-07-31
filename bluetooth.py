@@ -44,7 +44,6 @@ def sendCommand(event, commandEntry: tk.Entry, ser: serial.Serial, log: tk.Text)
     command = command.strip()
     if command == "":
       return
-    print(command)
     ser.write(command.encode())
     log.config(state=tk.NORMAL)
     now = datetime.now()

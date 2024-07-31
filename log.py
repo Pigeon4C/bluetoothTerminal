@@ -7,10 +7,8 @@ filePath = os.path.join("C:\\", "BluetoothTerminal", "logs\\")
 def init():
   try:
     global filePath
-    print(filePath)
     if not os.path.isdir(filePath):
       os.makedirs(filePath)
-      print("makedir")
     now = datetime.now()
     logFilePath = os.path.join(filePath, "log-" + now.strftime("%Y-%m-%d") + ".log")
     if not os.path.isfile(logFilePath):
@@ -24,7 +22,6 @@ def init():
 
 def log(logMessage: str) -> None:
   try:
-    print(logMessage)
     now = datetime.now()
     with open(filePath + "log-" + now.strftime("%Y-%m-%d") + ".log", "a") as logFile:
       logFile.write(f'[{now.strftime("%d.%m.%Y %H:%M:%S:%f")[:-3]}] {logMessage}\n')
