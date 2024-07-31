@@ -6,6 +6,8 @@ import bluetooth as bl
 import log
 import config
 
+log = ""
+ser = ""
 
 def createWindow(title: str, height: int, width: int):
   try:
@@ -45,7 +47,7 @@ def createTerminalGui(title: str, height: int, width: int, ):
   tGui.macroButtonFrame.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
 
   createMacroButtons(tGui)
-
+  global log, ser
   log = st.ScrolledText(tGui, state=tk.DISABLED, wrap=tk.WORD)
   log.pack(padx=5, pady=5)
 
@@ -56,14 +58,18 @@ def createTerminalGui(title: str, height: int, width: int, ):
 
 def openTerminal(windowName):
   print("open Terminal "+ str(windowName))
+  global ser
   terminal, ser, log = createTerminalGui(str(windowName), 400, 200)
   if ser.in_waiting > 0:
     bl.receiveMessage(ser, log)
   terminal.mainloop()
 
 
-def excecuteMacro(macroName):
-  return
+def excecuteMacro(macroIdx):
+  command = config.getValue(str(macroIdx) + "-command")
+  global log, ser
+  bl.sendMacroCommand(command, log, ser)
+  return  
 
 
 def configMacro(event, idx, macroButton):
@@ -91,7 +97,11 @@ def createPortButtons(sGui):
 
 
 def createMacroButtons(tGui):
-  for idx, macroName in enumerate(range(1,6)):
-    macroButton = tk.Button(tGui.macroButtonFrame, text=config.getValue(idx), command=lambda t=macroName: excecuteMacro(t))
+  for idx in range(1,6):
+    if not config.getValue(idx) == "not available":
+      macroName = config.getValue(idx)
+    else:
+      macroName = f"Macro{idx}"
+    macroButton = tk.Button(tGui.macroButtonFrame, text=macroName, command=lambda t=idx: excecuteMacro(t))
     macroButton.bind("<Button-3>", lambda event, t=idx, b=macroButton: configMacro(event, t ,b))
     macroButton.grid(row=0, column=idx, padx=5, pady=5)

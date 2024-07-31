@@ -53,19 +53,21 @@ def readConfig():
         return None
     
 
-def getValue(thing) -> str:
+def getValue(key) -> str:
   try:
-    print(thing)
-    names = readConfig()
-    print(names)
-    if thing in names.keys():
-      name = names[thing]
-      print("Name" + name)
-      return name
+    print(key)
+    config = readConfig()
+    print(config)
+    if str(key) in config.keys():
+      print("yes")
+      value = config[str(key)]
+      print(value)
+      if value == "":
+        raise ValueError("Value is a None value")
+      return value
     else:
-      raise KeyError
+      raise KeyError("Key not available")
   except Exception as e:
     log.log(str(e))
-    print("why")
-    return "not aviable"
+    return "not available"
 
