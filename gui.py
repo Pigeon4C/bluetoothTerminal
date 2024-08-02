@@ -34,6 +34,7 @@ def createMainGui(title: str, width: int, height: int):
     sGui.portButtonFrame.pack(padx=5, pady=5, fill=tk.BOTH, expand=True)
 
     createPortButtons(sGui)
+
     log.log(f"Created Main Gui with title: {title}, width: {width}, height: {height}")
     return sGui
   except Exception as e:
@@ -55,7 +56,9 @@ def createTerminalGui(title: str, port: str, width: int, height: int):
     terminalLog = st.ScrolledText(tGui, state=tk.DISABLED, wrap=tk.WORD)
     terminalLog.pack(padx=5, pady=5)
 
-    ser = bl.connectSerial(port, baudrate=9600, timeout=1)
+    baudrate = config.getValue("Baudrate")
+
+    ser = bl.connectSerial(port, baudrate=baudrate, timeout=1)
     if ser == None:
       tGui.destroy()
       messagebox.showerror("Error", f"There was an issue creating a connection\
